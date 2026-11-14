@@ -1,0 +1,15 @@
+node_modules/
+pnpm-lock.yaml
+
+# Datos privados (claves, base de datos, Mercado Pago): nunca al repo
+.env
+
+# Imágenes subidas desde el panel admin (las fotos del catálogo sí van al repo)
+public/img/productos/producto-*
+public/img/inicio/subidas/*
+
+# Fotos originales (ya están copiadas y renombradas en public/img/productos)
+fressia fotos/
+
+# Configuración local del editor
+.claude/

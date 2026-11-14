@@ -1,0 +1,103 @@
+</main>
+
+<%# ═════════ Beneficios (el inicio muestra los suyos, editables) ═════════ %>
+<% if (!(locals.contenido && contenido.beneficios)) { %>
+<section class="beneficios">
+  <div class="contenedor beneficios__grilla">
+    <div class="beneficio"><h3>Envíos a todo el país</h3><p>Gratis en compras superiores a <%= formatoPrecio(envioGratisDesde).replace(',00', '') %>.</p></div>
+    <div class="beneficio"><h3>10% off</h3><p>Pagando por transferencia bancaria.</p></div>
+    <div class="beneficio"><h3>Hasta 6 cuotas</h3><p>Con tarjeta, por Mercado Pago.</p></div>
+    <div class="beneficio"><h3>Cambios fáciles</h3><p>Si no te queda, lo cambiamos sin vueltas.</p></div>
+  </div>
+</section>
+<% } %>
+
+<% const t = locals.tienda || {}; %>
+<footer class="footer">
+  <%# El nombre de la marca, enorme y medio transparente, de fondo a lo largo %>
+  <div class="footer__fondo" aria-hidden="true"><span>Fressia</span></div>
+  <div class="contenedor footer__grilla">
+    <div class="footer__marca">
+      <a href="/" class="marca-link" aria-label="Inicio"><%- include('logo', { vivo: true }) %></a>
+      <p>Moda que te acompaña. Ropa, vestidos, accesorios y bolsos elegidos con amor para cada momento.</p>
+      <div class="footer__redes">
+        <% if (t.instagram) { %><a href="<%= t.instagram %>" target="_blank" rel="noopener">Instagram</a><% } %>
+        <% if (t.tiktok) { %><a href="<%= t.tiktok %>" target="_blank" rel="noopener">TikTok</a><% } %>
+        <% if (t.whatsapp) { %><a href="<%= t.whatsapp %>" target="_blank" rel="noopener">WhatsApp</a><% } %>
+      </div>
+    </div>
+    <div>
+      <h4>Tienda</h4>
+      <ul>
+        <li><a href="/novedades">Novedades</a></li>
+        <% (locals.categoriasMenu || []).forEach(cat => { %><li><a href="<%= cat.url %>"><%= cat.nombre %></a></li><% }) %>
+        <li><a href="/ofertas">Ofertas</a></li>
+      </ul>
+    </div>
+    <% if (t.direccion || t.horarios || t.email) { %><div>
+      <h4>Contacto</h4>
+      <div class="footer__datos">
+        <% if (t.direccion) { %><span><%= t.direccion %></span><% } %>
+        <% if (t.horarios) { %><span class="apagado"><%= t.horarios %></span><% } %>
+        <% if (t.email) { %><a href="mailto:<%= t.email %>"><%= t.email %></a><% } %>
+      </div>
+    </div><% } %>
+    <div>
+      <h4>Ayuda</h4>
+      <ul>
+        <li><a href="/terminos#envios">Envíos</a></li>
+        <li><a href="/terminos#pagos">Medios de pago</a></li>
+        <li><a href="/cambios-y-devoluciones">Cambios y devoluciones</a></li>
+        <li><a href="/terminos">Términos y condiciones</a></li>
+        <li><a href="/privacidad">Privacidad</a></li>
+        <li><a href="/cookies">Cookies</a></li>
+        <li><a href="/arrepentimiento" class="footer__arrepentimiento">Botón de arrepentimiento</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="contenedor footer__legal">
+    <span>
+      © <%= new Date().getFullYear() %> <%= t.nombre || 'Fressia' %>.
+      <% if (t.razonSocial) { %><%= t.razonSocial %><% if (t.cuit) { %> · CUIT <%= t.cuit %><% } %>.<% } %>
+      Todos los derechos reservados.
+    </span>
+    <span class="footer__oficiales">
+      <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" target="_blank" rel="noopener">Defensa de las y los consumidores. Para reclamos ingrese aquí</a>
+      <% if (t.dataFiscal) { %><a href="<%= t.dataFiscal %>" target="_blank" rel="noopener">Data fiscal</a><% } %>
+    </span>
+    <span>Visa · Mastercard · Amex · Naranja · Mercado Pago · Transferencia</span>
+  </div>
+</footer>
+
+<% if (t.whatsapp) { %>
+<a href="<%= t.whatsapp %>" class="whatsapp" aria-label="Escribinos por WhatsApp" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3a9 9 0 00-7.8 13.5L3 21l4.6-1.2A9 9 0 1012 3z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.3-2.3l.8-1-1-2L9.5 8z" fill="currentColor"/></svg>
+</a>
+<% } %>
+
+<%# Elegir talle antes de agregar desde una tarjeta %>
+<div class="hoja-fondo" id="hojaFondo" hidden></div>
+<div class="hoja" id="hojaTalle" role="dialog" aria-modal="true" aria-labelledby="hojaTitulo" hidden>
+  <div class="hoja__cab">
+    <div>
+      <p class="hoja__sub">Elegí tu talle</p>
+      <h2 class="hoja__titulo" id="hojaTitulo"></h2>
+    </div>
+    <button type="button" class="icono-btn" id="hojaCerrar" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="hoja__talles" id="hojaTalles" role="group" aria-label="Talles"></div>
+  <a class="enlace hoja__ficha" id="hojaFicha" href="#">Ver producto completo</a>
+</div>
+
+<div class="aviso-cookies" id="avisoCookies" role="region" aria-label="Aviso de cookies" hidden>
+  <p>Usamos solo las cookies necesarias para que la tienda funcione (tu sesión y tu carrito). <a href="/cookies">Más info</a></p>
+  <button type="button" class="btn btn--volt btn--chico" id="aceptarCookies">Entendido</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<% if (locals.flash) { %><div id="flash" data-mensaje="<%= flash %>" hidden></div><% } %>
+
+<script src="/js/anuncio.js"></script>
+<script src="/js/base.js"></script>

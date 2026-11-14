@@ -1,0 +1,161 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<%
+  const c = contenido;
+  const slides = c.portada.slides.filter((s) => s.imagen);
+  const flechaDer = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+%>
+
+<%# ═════════ CARRUSEL PRINCIPAL ═════════ %>
+<% if (slides.length) { %>
+<section class="carrusel" id="portada" aria-roledescription="carrusel" aria-label="Novedades de Fressia" data-carrusel data-intervalo="6000">
+  <div class="carrusel__pista">
+    <% slides.forEach((s, i) => { const fotos = [s.imagen, s.imagen2, s.imagen3].filter(Boolean); %>
+      <article class="slide slide--<%= fotos.length %>fotos slide--texto-<%= s.posicion || 'centro' %> <%= i === 0 ? 'is-activa' : '' %>" data-slide="<%= i %>" role="group" aria-roledescription="banner" aria-label="<%= i + 1 %> de <%= slides.length %>" <%= i === 0 ? '' : 'aria-hidden=true' %>>
+        <div class="slide__fotos">
+          <% fotos.forEach((f, j) => { %>
+            <img src="<%= f %>" alt="" class="slide__foto" <%= i === 0 && j === 0 ? 'fetchpriority=high' : 'loading=lazy' %>>
+          <% }) %>
+        </div>
+        <% if (s.titulo || s.etiqueta || s.botonTexto) { %>
+          <div class="slide__texto">
+            <% if (s.etiqueta) { %><p class="slide__etiqueta"><%= s.etiqueta %></p><% } %>
+            <% if (s.titulo) { %><h<%= i === 0 ? 1 : 2 %> class="slide__titulo"><%- textoRico(s.titulo) %></h<%= i === 0 ? 1 : 2 %>><% } %>
+            <% if (s.botonTexto && s.botonLink) { %><a href="<%= s.botonLink %>" class="slide__boton" <%= i === 0 ? '' : 'tabindex=-1' %>><%= s.botonTexto %></a><% } %>
+          </div>
+        <% } %>
+      </article>
+    <% }) %>
+  </div>
+
+  <% if (slides.length > 1) { %>
+    <button type="button" class="carrusel__flecha carrusel__flecha--ant" data-anterior aria-label="Banner anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <button type="button" class="carrusel__flecha carrusel__flecha--sig" data-siguiente aria-label="Banner siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <div class="carrusel__puntos" role="tablist" aria-label="Elegir banner">
+      <% slides.forEach((s, i) => { %>
+        <button type="button" class="carrusel__punto <%= i === 0 ? 'is-activo' : '' %>" data-ir="<%= i %>" role="tab" aria-selected="<%= i === 0 %>" aria-label="Banner <%= i + 1 %>"><span></span></button>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+<% } %>
+
+<%# ═════════ NUEVOS INGRESOS ═════════ %>
+<% if (c.nuevos.visible && nuevos.length) { %>
+<section class="bloque contenedor-ancho" id="novedades">
+  <header class="bloque__cab rev">
+    <h2 class="bloque__titulo"><%- textoRico(c.nuevos.titulo) %></h2>
+    <% if (c.nuevos.linkTexto) { %><a href="<%= c.nuevos.linkUrl %>" class="bloque__link"><%= c.nuevos.linkTexto %> <%- flechaDer %></a><% } %>
+  </header>
+  <div class="grilla-productos">
+    <% nuevos.forEach((p, i) => { %><%- include('partials/tarjeta', { p, indice: i }) %><% }) %>
+  </div>
+</section>
+<% } %>
+
+<%# ═════════ FOTOS DESTACADAS ═════════ %>
+<% if (c.destacadas.visible) { const items = c.destacadas.items.filter((d) => d.imagen); %>
+<% if (items.length) { %>
+<section class="destacadas contenedor-ancho">
+  <% items.forEach((d, i) => { %>
+    <a href="<%= d.link || '#' %>" class="destacada rev" style="--d: <%= i * 0.1 %>s">
+      <img src="<%= d.imagen %>" alt="" loading="lazy">
+      <span class="destacada__texto">
+        <% if (d.titulo) { %><strong class="destacada__titulo"><%= d.titulo %></strong><% } %>
+        <% if (d.botonTexto) { %><span class="destacada__boton"><%= d.botonTexto %></span><% } %>
+      </span>
+    </a>
+  <% }) %>
+</section>
+<% } %>
+<% } %>
+
+<%# ═════════ MÁS PRODUCTOS ═════════ %>
+<% if (c.masVendidos.visible && masVendidos.length) { %>
+<section class="bloque contenedor-ancho" id="mas-productos">
+  <header class="bloque__cab rev">
+    <h2 class="bloque__titulo"><%- textoRico(c.masVendidos.titulo) %></h2>
+    <% if (c.masVendidos.linkTexto) { %><a href="<%= c.masVendidos.linkUrl %>" class="bloque__link"><%= c.masVendidos.linkTexto %> <%- flechaDer %></a><% } %>
+  </header>
+  <div class="grilla-productos">
+    <% masVendidos.forEach((p, i) => { %><%- include('partials/tarjeta', { p, indice: i }) %><% }) %>
+  </div>
+</section>
+<% } %>
+
+<%# ═════════ BENEFICIOS ═════════ %>
+<% if (c.beneficios.visible) { %>
+<section class="beneficios beneficios--inicio">
+  <div class="contenedor-ancho beneficios__grilla">
+    <% c.beneficios.items.forEach((b) => { if (!b.titulo) return; %>
+      <div class="beneficio rev"><h3><%= b.titulo %></h3><p><%= b.texto %></p></div>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<%# ═════════ NUESTRO LOCAL (video + dirección + mapa) ═════════ %>
+<% if (c.local && c.local.visible && c.local.direccion) {
+  const l = c.local;
+  const lugar = [l.direccion, l.ciudad, 'Argentina'].filter(Boolean).join(', ');
+  const urlMapa = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lugar);
+  const urlEmbed = 'https://www.google.com/maps?q=' + encodeURIComponent(lugar) + '&z=16&output=embed';
+%>
+<section class="local" id="local" aria-labelledby="localTitulo" data-local>
+  <%# De fondo, el mismo video desenfocado (solo en pantallas grandes; lo carga inicio.js) %>
+  <video class="local__fondo" data-src="/video/local-fressia.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+  <div class="local__velo" aria-hidden="true"></div>
+
+  <div class="contenedor-ancho local__grilla">
+    <figure class="local__video rev">
+      <video src="/video/local-fressia.mp4" muted loop playsinline autoplay preload="metadata" data-video-local aria-label="Video del local de Fressia" disablepictureinpicture disableremoteplayback></video>
+      <span class="local__marco" aria-hidden="true"></span>
+      <figcaption class="local__chip">
+        <span class="local__punto" aria-hidden="true"></span> Te esperamos hoy
+      </figcaption>
+    </figure>
+
+    <div class="local__info rev" style="--d: .12s">
+      <p class="local__etiqueta"><%= l.etiqueta %></p>
+      <h2 class="local__titulo" id="localTitulo"><%- textoRico(l.titulo) %></h2>
+      <% if (l.bajada) { %><p class="local__bajada"><%= l.bajada %></p><% } %>
+
+      <ul class="local__datos">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          <span><strong><%= l.direccion %></strong><% if (l.referencia || l.ciudad) { %><small><%= [l.referencia, l.ciudad].filter(Boolean).join(' · ') %></small><% } %></span>
+        </li>
+        <% if (l.horarios) { %>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span><strong>Horarios</strong><small><%= l.horarios %></small></span>
+          </li>
+        <% } %>
+      </ul>
+
+      <div class="local__botones">
+        <a href="<%= urlMapa %>" target="_blank" rel="noopener" class="btn btn--volt">
+          <%= l.botonTexto || 'Cómo llegar' %>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a>
+        <% if (tienda.whatsapp) { %><a href="<%= tienda.whatsapp %>" target="_blank" rel="noopener" class="btn btn--linea">Escribinos</a><% } %>
+      </div>
+
+      <% if (l.mapa === 'si') { %>
+        <div class="local__mapa">
+          <iframe src="<%= urlEmbed %>" title="Mapa: <%= lugar %>" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>
+<script src="/js/inicio.js"></script>
+</body>
+</html>

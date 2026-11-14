@@ -1,0 +1,192 @@
+<%
+  const cats = locals.categoriasMenu || [];
+  const cantFav = (locals.favoritosIds || []).length;
+  const cantCarrito = locals.cantidadCarrito || 0;
+  const ruta = locals.currentPath || '/';
+  const activo = locals.navActivo || '';
+  const precioCorto = (n) => formatoPrecio(n).replace(',00', '');
+  const volverA = ['/login', '/'].includes(ruta) ? '' : '?volver=' + encodeURIComponent(ruta);
+  const urlCuenta = locals.usuarioLocal ? '/mi-cuenta/pedidos' : '/login' + volverA;
+  const flecha = '<svg class="nav__flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
+%>
+
+<%# ═════════ Barra de anuncios ═════════ %>
+<%
+  const mensajes = [
+    'Envíos a todo el país',
+    'Envío gratis en compras superiores a ' + precioCorto(envioGratisDesde),
+    'Hasta 6 cuotas · 10% off por transferencia',
+  ];
+  // Una rama con hojas y florcitas. Se dibuja en los dos extremos de la barra
+  // (la derecha espejada); las hojas que vuelan "salen" de la rama izquierda.
+  const hojaRama = (x, y, g, c, t = 1) =>
+    `<path class="rama__hoja" style="--g:${g}deg" transform="translate(${x} ${y}) rotate(${g}) scale(${t})" d="M0 0C4-5 12-6 18 0 12 6 4 5 0 0z" fill="${c}"/>`;
+  const flor = (x, y, c, t = 1) =>
+    `<g class="rama__flor" transform="translate(${x} ${y}) scale(${t})">${[0, 72, 144, 216, 288].map((a) => `<ellipse rx="2.6" ry="4.2" cy="-4" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="1.8" fill="#c29c6f"/></g>`;
+  const rama = `
+    <svg class="rama__svg" viewBox="0 0 170 46" aria-hidden="true">
+      <path d="M-4 34C30 30 58 18 92 20s52 8 76-8" fill="none" stroke="#8f6b4e" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M50 26c6-8 14-12 22-12" fill="none" stroke="#8f6b4e" stroke-width="1.1" stroke-linecap="round"/>
+      ${hojaRama(14, 31, -150, '#9aa77c')}
+      ${hojaRama(24, 29, 40, '#b9c49a', 0.9)}
+      ${hojaRama(40, 25, -140, '#c29c6f')}
+      ${hojaRama(60, 20, 30, '#9aa77c', 1.1)}
+      ${hojaRama(72, 14, -60, '#d6b48e', 0.8)}
+      ${hojaRama(96, 20, -150, '#b9c49a')}
+      ${hojaRama(112, 22, 35, '#c29c6f', 0.9)}
+      ${hojaRama(132, 20, -135, '#9aa77c', 0.85)}
+      ${hojaRama(150, 15, 25, '#d6b48e', 0.8)}
+      ${flor(70, 13, '#f2dccb', 0.9)}
+      ${flor(122, 15, '#ead1bd', 0.75)}
+      ${flor(163, 11, '#f2dccb', 0.7)}
+    </svg>`;
+%>
+<div class="anuncio" aria-label="Promociones" data-anuncio-barra>
+  <div class="anuncio__viento" aria-hidden="true">
+    <span class="rama rama--izq"><%- rama %></span>
+    <span class="rama rama--der"><%- rama %></span>
+    <%# Las hojas que vuelan, las rachas de viento y la brisa del mouse se dibujan acá (anuncio.js) %>
+    <canvas class="anuncio__lienzo" data-lienzo></canvas>
+  </div>
+  <div class="anuncio__textos" data-anuncio>
+    <% mensajes.forEach((m, i) => { %>
+      <p class="anuncio__item <%= i === 0 ? 'is-activo' : '' %>" <%= i === 0 ? '' : 'aria-hidden=true' %>><span><%= m %></span></p>
+    <% }) %>
+  </div>
+</div>
+
+<%# ═════════ Header ═════════ %>
+<header class="header" id="header">
+  <div class="header__barra contenedor">
+    <button class="icono-btn header__menu-btn" id="btnMenu" aria-label="Abrir menú" aria-expanded="false" aria-controls="drawer">
+      <span class="hamburguesa"></span>
+    </button>
+
+    <a href="/" class="marca-link" aria-label="Fressia Indumentaria — Inicio">
+      <%- include('logo', { vivo: true }) %>
+    </a>
+
+    <%# Menú: en PC va a la izquierda del logo; en celular y tablet, en pastillas debajo %>
+    <nav class="nav" aria-label="Principal">
+      <ul class="nav__lista">
+        <li class="nav__item--inicio"><a href="/" class="nav__pastilla <%= activo === 'inicio' ? 'is-activo' : '' %>">Inicio</a></li>
+        <li><a href="/novedades" class="nav__pastilla <%= activo === 'novedades' ? 'is-activo' : '' %>">Novedades</a></li>
+        <% cats.forEach(cat => { const subs = cat.subcategorias || []; %>
+          <li class="nav__item <%= subs.length ? 'nav__item--sub' : '' %>">
+            <a href="<%= cat.url %>" class="nav__pastilla <%= activo === cat.slug ? 'is-activo' : '' %>"><%= cat.nombre %><% if (subs.length) { %><%- flecha %><% } %></a>
+            <% if (subs.length) { %>
+              <ul class="nav__menu">
+                <li><a href="<%= cat.url %>">Ver todo</a></li>
+                <% subs.forEach(s => { %><li><a href="<%= s.url %>"><%= s.nombre %></a></li><% }) %>
+              </ul>
+            <% } %>
+          </li>
+        <% }) %>
+        <li><a href="/ofertas" class="nav__pastilla nav__pastilla--sale <%= activo === 'ofertas' ? 'is-activo' : '' %>">Ofertas</a></li>
+      </ul>
+    </nav>
+
+    <div class="header__acciones">
+      <button type="button" class="icono-btn header__accion header__buscar-btn" id="btnBuscar" aria-label="Buscar" aria-expanded="false" aria-controls="buscador">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4" stroke-linecap="round"/></svg>
+        <span class="header__etiqueta">Buscar</span>
+      </button>
+
+      <% if (locals.usuarioLocal) { %>
+        <div class="cuenta" id="cuenta">
+          <button class="icono-btn header__accion" id="cuentaBtn" aria-label="Mi cuenta" aria-expanded="false" aria-controls="cuentaMenu">
+            <span class="cuenta__inicial"><%= usuarioLocal.nombre.charAt(0) %></span>
+            <span class="header__etiqueta">Mi cuenta</span>
+          </button>
+          <div class="cuenta__menu" id="cuentaMenu" hidden>
+            <p class="cuenta__hola">Hola, <strong><%= usuarioLocal.nombre %></strong></p>
+            <p class="cuenta__email"><%= usuarioLocal.email %></p>
+            <% if (esAdmin(usuarioLocal)) { %>
+              <a href="/admin" class="cuenta__link cuenta__link--admin">Panel de administración →</a>
+            <% } %>
+            <a href="/mi-cuenta/pedidos" class="cuenta__link">Mis pedidos</a>
+            <a href="/mi-cuenta/datos" class="cuenta__link">Mis datos</a>
+            <a href="/favoritos" class="cuenta__link">Favoritos</a>
+            <form action="/logout" method="POST">
+              <button type="submit" class="cuenta__salir">Cerrar sesión</button>
+            </form>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/login<%= volverA %>" class="icono-btn header__accion" aria-label="Iniciar sesión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          <span class="header__etiqueta">Iniciar sesión</span>
+        </a>
+      <% } %>
+
+      <a href="/favoritos" class="icono-btn header__accion header__fav" aria-label="Favoritos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>
+        <span class="contador" id="contadorFavoritos" <%= cantFav ? '' : 'hidden' %>><%= cantFav %></span>
+        <span class="header__etiqueta">Favoritos</span>
+      </a>
+
+      <a href="/carrito" class="icono-btn header__accion" aria-label="Carrito">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg>
+        <span class="contador contador--fijo" data-contador-carrito><%= cantCarrito %></span>
+        <span class="header__etiqueta">Carrito</span>
+      </a>
+    </div>
+
+    <%# Buscador: fijo en celular y tablet; en PC se despliega con "Buscar" %>
+    <form class="buscador" action="/buscar" method="GET" role="search" id="buscador" autocomplete="off">
+      <svg class="buscador__lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4" stroke-linecap="round"/></svg>
+      <input type="search" name="q" id="busquedaInput" value="<%= locals.busqueda || '' %>" placeholder="Buscar productos..." aria-label="Buscar productos" maxlength="60" aria-controls="sugerencias" aria-expanded="false">
+      <div class="sugerencias" id="sugerencias" aria-live="polite" hidden></div>
+    </form>
+  </div>
+</header>
+
+<%# ═════════ Menú lateral (celular y tablet) ═════════ %>
+<div class="drawer-fondo" id="drawerFondo" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Menú">
+  <div class="drawer__cab">
+    <span class="drawer__logo"><%- include('logo') %></span>
+    <button class="icono-btn" id="btnCerrarMenu" aria-label="Cerrar menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <nav class="drawer__lista">
+    <a href="/">Inicio</a>
+    <a href="/novedades">Novedades</a>
+    <% cats.forEach(cat => { %>
+      <a href="<%= cat.url %>"><%= cat.nombre %></a>
+      <% (cat.subcategorias || []).forEach(s => { %><a href="<%= s.url %>" class="drawer__sub"><%= s.nombre %></a><% }) %>
+    <% }) %>
+    <a href="/ofertas">Ofertas</a>
+    <a href="/favoritos">Favoritos <% if (cantFav) { %><small>(<%= cantFav %>)</small><% } %></a>
+  </nav>
+  <div class="drawer__pie">
+    <% if (tienda.horarios) { %><span><%= tienda.horarios %></span><% } %>
+    <% if (tienda.instagram) { %><a href="<%= tienda.instagram %>" target="_blank" rel="noopener"><%= tienda.usuario %></a><% } %>
+  </div>
+</aside>
+
+<%# ═════════ Barra inferior (celular y tablet) ═════════ %>
+<nav class="barra-inferior" aria-label="Accesos rápidos">
+  <a href="/" class="<%= ruta === '/' ? 'is-activo' : '' %>">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7v9h-6v-6h-5v6h-6z"/></svg>
+    <span>Inicio</span>
+  </a>
+  <a href="/favoritos" class="<%= ruta.startsWith('/favoritos') ? 'is-activo' : '' %>">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>
+    <span>Favoritos</span>
+  </a>
+  <a href="/carrito" class="<%= ruta.startsWith('/carrito') || ruta.startsWith('/checkout') ? 'is-activo' : '' %>">
+    <span class="barra-inferior__icono">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg>
+      <span class="contador contador--fijo" data-contador-carrito><%= cantCarrito %></span>
+    </span>
+    <span>Mi carrito</span>
+  </a>
+  <a href="<%= urlCuenta %>" class="<%= ruta.startsWith('/mi-cuenta') || ruta.startsWith('/login') ? 'is-activo' : '' %>">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+    <span>Mi cuenta</span>
+  </a>
+</nav>
+
+<main id="contenido">

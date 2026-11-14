@@ -1,0 +1,22 @@
+<%# Logo Fressia (sello redondo con corazones). animado: aparece suave · vivo: late al pasar el mouse %>
+<% const uid = 'fl' + Math.random().toString(36).slice(2, 8); %>
+<svg class="fressia-logo <%= locals.animado ? 'fressia-logo--anim' : '' %> <%= locals.vivo ? 'fressia-logo--vivo' : '' %> <%= locals.clase || '' %>" viewBox="0 0 200 200" role="img" aria-label="Fressia Indumentaria">
+  <defs>
+    <%# Los anillos se cortan donde pasa la palabra FRESSIA %>
+    <mask id="<%= uid %>">
+      <rect width="200" height="200" fill="#fff"/>
+      <text x="100" y="121" text-anchor="middle" class="fressia-logo__marca" stroke="#000" stroke-width="10" stroke-linejoin="round" fill="#000">FRESSIA</text>
+    </mask>
+  </defs>
+  <g mask="url(#<%= uid %>)" fill="none" stroke="currentColor">
+    <circle cx="100" cy="100" r="88" stroke-width="3.2"/>
+    <circle cx="100" cy="100" r="80" stroke-width="1.6"/>
+  </g>
+  <g class="fressia-logo__corazones" fill="currentColor">
+    <path d="M100 82c-1.2-1.6-6.5-5.3-6.5-9.1a3.6 3.6 0 0 1 6.5-2.2 3.6 3.6 0 0 1 6.5 2.2c0 3.8-5.3 7.5-6.5 9.1z"/>
+    <path d="M88 76.5c-.6-.8-3.5-2.8-3.5-4.9a1.9 1.9 0 0 1 3.5-1.2 1.9 1.9 0 0 1 3.5 1.2c0 2.1-2.9 4.1-3.5 4.9z" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M112 76.5c-.6-.8-3.5-2.8-3.5-4.9a1.9 1.9 0 0 1 3.5-1.2 1.9 1.9 0 0 1 3.5 1.2c0 2.1-2.9 4.1-3.5 4.9z" fill="none" stroke="currentColor" stroke-width="1"/>
+  </g>
+  <text x="100" y="121" text-anchor="middle" class="fressia-logo__marca" fill="currentColor">FRESSIA</text>
+  <text x="100" y="146" text-anchor="middle" class="fressia-logo__sub" fill="currentColor">Indumentaria</text>
+</svg>

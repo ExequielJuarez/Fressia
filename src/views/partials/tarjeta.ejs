@@ -1,0 +1,39 @@
+<%# Tarjeta de producto. Recibe: p (producto) y, opcional, indice (para escalonar la aparición) %>
+<%
+  const esFav = (locals.favoritosIds || []).includes(p.id);
+  const agotado = p.stock <= 0;
+  const datosAgregar = `data-agregar="${p.id}" data-nombre="${String(p.nombre).replace(/"/g, '&quot;')}" data-talles="${p.talles.join(',')}"`;
+  const iconoBolsa = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg>';
+%>
+<article class="tarjeta rev" style="--d: <%= ((locals.indice || 0) % 4) * 0.07 %>s" data-id="<%= p.id %>" data-precio="<%= p.precio %>" data-grupo="<%= (locals.grupoCampo === 'categoria') ? p.categoria : p.subcategoriaSlug %>" data-colores="<%= p.colores.map(c => c.valor).join(',') %>" data-talles="<%= p.talles.join(',') %>" data-stock="<%= p.stock > 0 ? 1 : 0 %>">
+  <div class="tarjeta__foto">
+    <% if (p.etiqueta && !agotado) { %><span class="tarjeta__etiqueta"><%= p.etiqueta %></span><% } %>
+    <button type="button" class="tarjeta__fav" data-fav="<%= p.id %>" aria-pressed="<%= esFav %>" aria-label="Guardar en favoritos">
+      <svg viewBox="0 0 24 24" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>
+    </button>
+    <a href="/producto/<%= p.id %>" tabindex="-1" aria-hidden="true" class="tarjeta__link-foto">
+      <% if (p.imagenes[0]) { %><img src="<%= p.imagenes[0].ruta %>" alt="" loading="lazy"><% } %>
+      <% if (p.imagenes[1]) { %><img src="<%= p.imagenes[1].ruta %>" alt="" loading="lazy"><% } %>
+    </a>
+    <% if (agotado) { %>
+      <span class="tarjeta__agotado">Agotado</span>
+    <% } else { %>
+      <%# PC: aparece al pasar el mouse sobre la foto %>
+      <button type="button" class="tarjeta__rapido" <%- datosAgregar %>><%- iconoBolsa %><span>Agregar al carrito</span></button>
+    <% } %>
+  </div>
+  <div class="tarjeta__datos">
+    <h3 class="tarjeta__nombre"><a href="/producto/<%= p.id %>"><%= p.nombre %></a></h3>
+    <div class="tarjeta__precio"><span class="precio"><%= formatoPrecio(p.precio).replace(',00', '').replace('$', '$ ') %></span></div>
+    <span class="tarjeta__cuotas">6 cuotas de <%= formatoPrecio(Math.ceil(p.precio / 6)).replace(",00", "") %></span>
+    <% if (p.colores.length > 1) { %>
+      <div class="puntos-color" aria-label="Colores: <%= p.colores.map(c => c.nombre).join(', ') %>">
+        <% p.colores.forEach(c => { %><span class="punto-color" style="background: <%= c.hex %>" title="<%= c.nombre %>"></span><% }) %>
+      </div>
+    <% } %>
+    <%# Celular y tablet: botón debajo del precio %>
+    <button type="button" class="btn btn--volt btn--bloque tarjeta__agregar" <%- datosAgregar %> <%= agotado ? 'disabled' : '' %>>
+      <%- iconoBolsa %><span><%= agotado ? 'Sin stock' : 'Agregar al carrito' %></span>
+    </button>
+  </div>
+</article>
